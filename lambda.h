@@ -14,54 +14,54 @@ class subscript_action;
 template<class T>
 class lambda_functor: public T {
 public:
-	typedef T inherited;
+    typedef T inherited;
 
-	lambda_functor() = default;
-	lambda_functor(const lambda_functor &l): inherited(l) {}
-	lambda_functor(const T &t): inherited(t) {}
+    lambda_functor() = default;
+    lambda_functor(const lambda_functor &l): inherited(l) {}
+    lambda_functor(const T &t): inherited(t) {}
 
-	template<class... Args>
-	auto operator()(Args &&... args) const -> decltype(inherited::template call(std::forward<Args>(args)...)) {
-		return inherited::template call(std::forward<Args>(args)...);
-	}
-	template<class A>
-	lambda_functor<lambda_binary_functor<assignment_action, const lambda_functor<T>, A> >
-	operator = (A &a) const {
-		return lambda_binary_functor<assignment_action, const lambda_functor<T>, A>(*this, a);
-	}
-	template<class A>
-	lambda_functor<lambda_binary_functor<assignment_action, const lambda_functor<T>, const A> >
-	operator = (const A &a) const {
-		return lambda_binary_functor<assignment_action, const lambda_functor<T>, const A>(*this, a);
-	}
-	template<class A>
-	lambda_functor<lambda_binary_functor<subscript_action, const lambda_functor<T>, A> >
-	operator [] (A &a) const {
-		return lambda_binary_functor<subscript_action, const lambda_functor<T>, A>(*this, a);
-	}
-	template<class A>
-	lambda_functor<lambda_binary_functor<subscript_action, const lambda_functor<T>, const A> >
-	operator [] (const A &a) const {
-		return lambda_binary_functor<subscript_action, const lambda_functor<T>, const A>(*this, a);
-	}
+    template<class... Args>
+    auto operator()(Args &&... args) const -> decltype(inherited::call(std::forward<Args>(args)...)) {
+        return inherited::template call(std::forward<Args>(args)...);
+    }
+    template<class A>
+    lambda_functor<lambda_binary_functor<assignment_action, const lambda_functor<T>, A> >
+    operator = (A &a) const {
+        return lambda_binary_functor<assignment_action, const lambda_functor<T>, A>(*this, a);
+    }
+    template<class A>
+    lambda_functor<lambda_binary_functor<assignment_action, const lambda_functor<T>, const A> >
+    operator = (const A &a) const {
+        return lambda_binary_functor<assignment_action, const lambda_functor<T>, const A>(*this, a);
+    }
+    template<class A>
+    lambda_functor<lambda_binary_functor<subscript_action, const lambda_functor<T>, A> >
+    operator [] (A &a) const {
+        return lambda_binary_functor<subscript_action, const lambda_functor<T>, A>(*this, a);
+    }
+    template<class A>
+    lambda_functor<lambda_binary_functor<subscript_action, const lambda_functor<T>, const A> >
+    operator [] (const A &a) const {
+        return lambda_binary_functor<subscript_action, const lambda_functor<T>, const A>(*this, a);
+    }
 };
 
 
 template<int N>
 struct placeholder {
-	template<class Arg, class... Args>
-	auto call(Arg &&arg, Args &&... args) const -> decltype(placeholder<N - 1>().call(std::forward<Args>(args)...)) {
-		do_nothing(arg);
-		return placeholder<N - 1>().call(std::forward<Args>(args)...);
-	}
+    template<class Arg, class... Args>
+    auto call(Arg &&arg, Args &&... args) const -> decltype(placeholder<N - 1>().call(std::forward<Args>(args)...)) {
+        do_nothing(arg);
+        return placeholder<N - 1>().call(std::forward<Args>(args)...);
+    }
 };
 template<>
 struct placeholder<0> {
-	template<class Arg, class... Args>
-	auto call(Arg &&arg, Args &&... args) const -> decltype(arg) {
-		do_nothing(args...);
-		return std::forward<Arg>(arg);
-	}
+    template<class Arg, class... Args>
+    auto call(Arg &&arg, Args &&... args) const -> decltype(arg) {
+        do_nothing(args...);
+        return std::forward<Arg>(arg);
+    }
 };
 
 #define LAMBDA_PLACEHOLDER(POSITION, NAME) const auto NAME = lambda_functor<placeholder<POSITION> >();
@@ -78,12 +78,12 @@ LAMBDA_PLACEHOLDER(8, _9)
 
 template<class Any, class... Args>
 inline auto select(Any &&any, Args &&... args) -> decltype(any) {
-	do_nothing(args...);
-	return std::forward<Any>(any);
+    do_nothing(args...);
+    return std::forward<Any>(any);
 }
 template<class Arg, class... Args>
 inline auto select(const lambda_functor<Arg> &op, Args &&... args) -> decltype(op.template call(std::forward<Args>(args)...)) {
-	return op.template call(std::forward<Args>(args)...);
+    return op.template call(std::forward<Args>(args)...);
 }
 
 #define LAMBDA_FUNCTOR_EXPRESSION(...) template<class... Args> auto call(Args &&... args) const -> decltype(__VA_ARGS__) { return __VA_ARGS__; }
@@ -97,7 +97,7 @@ struct lambda_binary_functor<ACTION_CLASS, ArgA, ArgB> {                        
     ArgA &arga;                                                                                                           \
     ArgB &argb;                                                                                                           \
     lambda_binary_functor(ArgA &arga, ArgB &argb): arga(arga), argb(argb) {}                                              \
-	LAMBDA_FUNCTOR_EXPRESSION(select(arga, std::forward<Args>(args)...) SYMBOL select(argb, std::forward<Args>(args)...)) \
+    LAMBDA_FUNCTOR_EXPRESSION(select(arga, std::forward<Args>(args)...) SYMBOL select(argb, std::forward<Args>(args)...)) \
 };
 #define LAMBDA_BINARY_ACTION_OPERATOR(SYMBOL, ACTION_CLASS)                                                    \
 template<class Arg, class B>                                                                                   \
@@ -137,7 +137,7 @@ template<class Arg>                                                             
 struct lambda_prefix_unary_functor<ACTION_CLASS, Arg> {                                     \
     Arg &arg;                                                                               \
     lambda_prefix_unary_functor(Arg &arg): arg(arg) {}                                      \
-	LAMBDA_FUNCTOR_EXPRESSION(SYMBOL select(arg, std::forward<Args>(args)...))              \
+    LAMBDA_FUNCTOR_EXPRESSION(SYMBOL select(arg, std::forward<Args>(args)...))              \
 };                                                                                          \
 template<class A>                                                                           \
 inline lambda_functor<lambda_prefix_unary_functor<ACTION_CLASS, const lambda_functor<A> > > \
@@ -153,7 +153,7 @@ template<class Arg>                                                             
 struct lambda_postfix_unary_functor<ACTION_CLASS, Arg> {                                     \
     Arg &arg;                                                                                \
     lambda_postfix_unary_functor(Arg &arg): arg(arg) {}                                      \
-	LAMBDA_FUNCTOR_EXPRESSION(select(arg, std::forward<Args>(args)...) SYMBOL)               \
+    LAMBDA_FUNCTOR_EXPRESSION(select(arg, std::forward<Args>(args)...) SYMBOL)               \
 };                                                                                           \
 template<class A>                                                                            \
 inline lambda_functor<lambda_postfix_unary_functor<ACTION_CLASS, const lambda_functor<A> > > \
@@ -198,10 +198,10 @@ LAMBDA_BINARY_ACTION_CLASS(=, assignment_action)
 class subscript_action{};
 template<class ArgA, class ArgB>
 struct lambda_binary_functor<subscript_action, ArgA, ArgB> {
-	ArgA &arga;
-	ArgB &argb;
-	lambda_binary_functor(ArgA &arga, ArgB &argb): arga(arga), argb(argb) {}
-	LAMBDA_FUNCTOR_EXPRESSION(select(arga, std::forward<Args>(args)...)[select(argb, std::forward<Args>(args)...)])
+    ArgA &arga;
+    ArgB &argb;
+    lambda_binary_functor(ArgA &arga, ArgB &argb): arga(arga), argb(argb) {}
+    LAMBDA_FUNCTOR_EXPRESSION(select(arga, std::forward<Args>(args)...)[select(argb, std::forward<Args>(args)...)])
 };
 
 LAMBDA_PREFIX_UNARY_ACTION(+,  unary_plus_action)
@@ -218,9 +218,9 @@ LAMBDA_POSTFIX_UNARY_ACTION(--, post_decrement_action)
 
 template<class Arg>
 struct lambda_ref_functor {
-	Arg &arg;
-	lambda_ref_functor(Arg &arg): arg(arg) {}
-	LAMBDA_FUNCTOR_EXPRESSION(select(arg, std::forward<Args>(args)...))
+    Arg &arg;
+    lambda_ref_functor(Arg &arg): arg(arg) {}
+    LAMBDA_FUNCTOR_EXPRESSION(select(arg, std::forward<Args>(args)...))
 };
 template<class A>
 inline lambda_functor<lambda_ref_functor<A> > ref(A &a) { return lambda_ref_functor<A>(a); }
